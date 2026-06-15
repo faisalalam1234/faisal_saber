@@ -836,7 +836,7 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                         Download Asset
                     </a>
-                `;
+                ];
                 grid.appendChild(card);
             });
             
@@ -886,48 +886,32 @@
         function runCounterMetrics() {
             const counter = document.getElementById('download-counter');
             const maxVal = +counter.getAttribute('data-target');
-            const stepRate = maxVal / 140;
-
-            const triggerProgress = () => {
-                const presentVal = +counter.innerText.replace('+', '');
-                if (presentVal < maxVal) {
-                    counter.innerText = Math.ceil(presentVal + stepRate) + "+";
-                    setTimeout(triggerProgress, 8);
+            
+            // Completed counter animation script
+            const duration = 2000; // Animation duration in milliseconds
+            const startTime = performance.now();
+            
+            function updateCounter(currentTime) {
+                const elapsedTime = currentTime - startTime;
+                if (elapsedTime < duration) {
+                    const progress = elapsedTime / duration;
+                    // Ease-out cubic calculation for smooth slowdown at the end
+                    const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+                    const currentVal = Math.floor(easeOutProgress * maxVal);
+                    counter.innerText = currentVal.toLocaleString() + "+";
+                    requestAnimationFrame(updateCounter);
                 } else {
                     counter.innerText = maxVal.toLocaleString() + "+";
                 }
-            };
-            triggerProgress();
+            }
+            requestAnimationFrame(updateCounter);
         }
 
-        // SLIDER DYNAMICS MANAGEMENT ENGINE
-        const bgSlider = document.getElementById('bg-slider');
-        const cinematicThumbs = [
-            'https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1920', 
-            'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=1920', 
-            'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=1920'
-        ];
-
-        cinematicThumbs.forEach((url, index) => {
-            const slide = document.createElement('div');
-            slide.className = `bg-slide ${index === 0 ? 'active' : ''}`;
-            slide.style.backgroundImage = `url('${url}')`;
-            bgSlider.appendChild(slide);
+        // INITIALIZATION CALLS
+        document.addEventListener('DOMContentLoaded', () => {
+            processActiveFilters();
+            runCounterMetrics();
         });
-
-        let activeSlidePointer = 0;
-        function routeSlideRotation() {
-            const slides = document.querySelectorAll('.bg-slide');
-            slides[activeSlidePointer].classList.remove('active');
-            activeSlidePointer = (activeSlidePointer + 1) % slides.length;
-            slides[activeSlidePointer].classList.add('active');
-        }
-        setInterval(routeSlideRotation, 5500); 
-
-        // INITIAL SYSTEMS DEPLOYMENT INIT
-        displayPresets(presetsData);
-        setTimeout(runCounterMetrics, 500);
-        setTimeout(executeScrollReveal, 250);
     </script>
 </body>
 </html>
